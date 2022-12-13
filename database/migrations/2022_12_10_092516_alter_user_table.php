@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::table('User', function (Blueprint $table) {
             $table->string('password')->after('email');
+            $table->string('is_movie_studio');
         });
     }
 
@@ -27,6 +28,7 @@ return new class extends Migration
     {
         Schema::table('User', function (Blueprint $table) {
             $table->string('password');
+            $table->string('is_movie_studio');
         });
     }
 };

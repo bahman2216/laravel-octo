@@ -19,7 +19,7 @@ class RegisterController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
-            'email' => 'required|email',
+            'email' => 'required|unique:users',
             'password' => 'required',
             'c_password' => 'required|same:password',
         ]);
@@ -50,7 +50,9 @@ class RegisterController extends Controller
     {
         if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){
             $user = Auth::user();
-            $data['token'] =  $user->createToken('OctoApp')->plainTextToken;
+
+            $ability = $user->is_movie_studio === 1 ? ['movie-add'] : ['movie-list'];
+            $data['token'] =  $user->createToken('OctoApp', $ability)->plainTextToken;
             $data['name'] =  $user->name;
 
             return response()->json([

@@ -6,7 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\MoviePerformerResource;
 use App\Http\Resources\MovieResource;
 use App\Http\Resources\MovieTimeSlotResource;
+use App\Models\Director;
+use App\Models\Genre;
+use App\Models\Language;
 use App\Models\Movie;
+use App\Models\Performer;
 use App\Models\Theater;
 use App\Models\TimeSlot;
 use Illuminate\Http\Request;
@@ -39,9 +43,49 @@ class MovieController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function addMovie(Request $request)
     {
-        //
+        if ( $request->user()->tokenCan('movie-add') ) {
+            $input = $request->all();
+            $movie = Movie::create($input);
+
+            $genres = $input['genre'];
+            $directors = $input['director'];
+            $performers = $input['performer'];
+            $languages = $input['language'];
+
+            $genres_ids = Genre::whereIn('name', $genres)->get('id');
+
+            $movie->genres()->attach(
+                $genres_ids
+            );
+
+            $directors_ids = Director::whereIn('name', $directors)->get('id');
+
+            $movie->directors()->attach(
+                $directors_ids
+            );
+
+            $performers_ids = Performer::whereIn('name', $performers)->get('id');
+
+            $movie->performers()->attach(
+                $performers_ids
+            );
+
+            $languages_ids = Language::whereIn('name', $languages)->get('id');
+
+            $movie->languages()->attach(
+                $languages_ids
+            );
+
+            return response()->json([
+                    "message" => "Successfully added movie ".$input['title']." with Movie_ID ".$movie->id,
+                    "success" => true
+            ]);
+
+        } else {
+            return response()->json(['error' => 'Forbidden.'], 403);
+        }
     }
 
     /**
